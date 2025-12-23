@@ -197,16 +197,6 @@ For production deployment:
 5. **Set CRM_HOST** to your actual domain in `bot/.env`
 6. **Change default passwords** for database and admin account
 
-
- Permissions |
-|------|-------------|-------------|
-| **Administrator** | Full system access - manage users, roles, markers, moderate and assign orders | All 10 permissions |
-| **Support** | View orders, chat with customers, moderate orders, assign programmers, send payment info | `view_orders`, `chat_customers`, `moderate_orders`, `assign_orders`, `update_order_status`, `send_payment_info` |
-| **Programmer** | View approved orders, submit price proposals, update status of assigned orders | `view_orders`, `respond_orders`
-| **Administrator** | Full system access - manage users, roles, markers, moderate and assign orders |
-| **Support** | View orders, chat with customers, moderate orders, assign to programmers |
-| **Programmer** | View approved orders, submit price proposals, update status of assigned orders |
-
 ## 🔄 Order Workflow
 
 ```

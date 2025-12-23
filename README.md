@@ -197,7 +197,7 @@ For production deployment:
 5. **Set CRM_HOST** to your actual domain in `bot/.env`
 6. **Change default passwords** for database and admin account
 
-See deployment guides for specific platforms in the `/docs` folder (if available).
+
  Permissions |
 |------|-------------|-------------|
 | **Administrator** | Full system access - manage users, roles, markers, moderate and assign orders | All 10 permissions |

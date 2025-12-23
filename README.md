@@ -243,7 +243,9 @@ Each status change triggers a Telegram notification to the customer. Staff membe
 | New Response | Staff with `assign_orders` permission | Telegram |
 | Status Change | Customer | Telegram |
 | Chat Message (from CRM) | Customer | Telegram |
-| C📊 Web Interface Pages
+
+
+## 📊 Web Interface Pages
 
 | Page | URL | Description |
 |------|-----|-------------|

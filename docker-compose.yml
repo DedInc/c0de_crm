@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Dragonfly - Redis-compatible in-memory data store (faster than Redis)
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    container_name: c0de_crm_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    command: >
+      --maxmemory 256mb
+      --proactor_threads 2
+      --cache_mode true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: c0de_crm_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-crm_bot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm_user} -d ${POSTGRES_DB:-crm_bot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dragonfly_data:
+  postgres_data:

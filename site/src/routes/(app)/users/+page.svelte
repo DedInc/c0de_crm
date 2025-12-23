@@ -10,6 +10,7 @@
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { UserFormDialog, DeleteUserDialog } from '$lib/components/users';
+	import { createUserFormManager } from '$lib/utils/user-form-manager.svelte';
 
 	interface Marker {
 		id: string;
@@ -35,20 +36,12 @@
 	let allMarkers = $state<Marker[]>([]);
 	let loading = $state(true);
 
-	// Form state
 	let showDialog = $state(false);
-	let editingUser = $state<User | null>(null);
-	let formUsername = $state('');
-	let formPassword = $state('');
-	let formTelegramId = $state('');
-	let formRoleIds = $state<string[]>([]);
-	let formMarkerIds = $state<string[]>([]);
 	let submitting = $state(false);
-	let formError = $state('');
-
-	// Delete confirmation
 	let showDeleteDialog = $state(false);
 	let deletingUser = $state<User | null>(null);
+
+	const formManager = createUserFormManager();
 
 	onMount(async () => {
 		await loadData();
@@ -72,87 +65,46 @@
 	}
 
 	function openCreateDialog() {
-		editingUser = null;
-		formUsername = '';
-		formPassword = '';
-		formTelegramId = '';
-		formRoleIds = [];
-		formMarkerIds = [];
-		formError = '';
+		formManager.openCreateForm();
 		showDialog = true;
 	}
 
 	function openEditDialog(user: User) {
-		editingUser = user;
-		formUsername = user.username;
-		formPassword = '';
-		formTelegramId = user.telegramId || '';
-		formRoleIds = user.roles.map((r) => r.roleId);
-		formMarkerIds = user.markers.map((m) => m.id);
-		formError = '';
+		formManager.openEditForm(user);
 		showDialog = true;
 	}
 
-	function toggleRole(roleId: string) {
-		if (formRoleIds.includes(roleId)) {
-			formRoleIds = formRoleIds.filter((id) => id !== roleId);
-		} else {
-			formRoleIds = [...formRoleIds, roleId];
-		}
-	}
-
-	function toggleMarker(markerId: string) {
-		if (formMarkerIds.includes(markerId)) {
-			formMarkerIds = formMarkerIds.filter((id) => id !== markerId);
-		} else {
-			formMarkerIds = [...formMarkerIds, markerId];
-		}
-	}
-
 	async function handleSubmit() {
-		formError = '';
-
-		if (!formUsername.trim()) {
-			formError = 'Username is required';
-			return;
-		}
-
-		if (!editingUser && !formPassword) {
-			formError = 'Password is required for new users';
-			return;
-		}
-
-		if (formPassword && formPassword.length < 6) {
-			formError = 'Password must be at least 6 characters';
+		const validationError = formManager.validateForm();
+		if (validationError) {
+			formManager.formError = validationError;
 			return;
 		}
 
 		submitting = true;
 
 		try {
-			if (editingUser) {
+			const formData = formManager.getFormData();
+			
+			if (formManager.editingUser) {
 				await trpc.users.update.mutate({
-					id: editingUser.id,
-					username: formUsername,
-					password: formPassword || undefined,
-					telegramId: formTelegramId || null,
-					roleIds: formRoleIds,
-					markerIds: formMarkerIds
+					id: formManager.editingUser.id,
+					...formData
 				});
 			} else {
 				await trpc.users.create.mutate({
-					username: formUsername,
-					password: formPassword,
-					telegramId: formTelegramId || undefined,
-					roleIds: formRoleIds,
-					markerIds: formMarkerIds
+					username: formData.username,
+					password: formData.password!,
+					roleIds: formData.roleIds,
+					telegramId: formData.telegramId || undefined,
+					markerIds: formData.markerIds
 				});
 			}
 
 			showDialog = false;
 			await loadData();
 		} catch (e: unknown) {
-			formError = (e as Error).message || 'Failed to save user';
+			formManager.formError = (e as Error).message || 'Failed to save user';
 		} finally {
 			submitting = false;
 		}
@@ -264,20 +216,20 @@
 <!-- Create/Edit Dialog -->
 <UserFormDialog
 	bind:open={showDialog}
-	isEditing={!!editingUser}
-	bind:formUsername
-	bind:formPassword
-	bind:formTelegramId
-	bind:formRoleIds
-	bind:formMarkerIds
+	isEditing={!!formManager.editingUser}
+	bind:formUsername={formManager.formUsername}
+	bind:formPassword={formManager.formPassword}
+	bind:formTelegramId={formManager.formTelegramId}
+	bind:formRoleIds={formManager.formRoleIds}
+	bind:formMarkerIds={formManager.formMarkerIds}
 	{roles}
 	markers={allMarkers}
 	{submitting}
-	{formError}
+	formError={formManager.formError}
 	onSubmit={handleSubmit}
 	onClose={() => (showDialog = false)}
-	onToggleRole={toggleRole}
-	onToggleMarker={toggleMarker}
+	onToggleRole={formManager.toggleRole}
+	onToggleMarker={formManager.toggleMarker}
 />
 
 <!-- Delete Confirmation Dialog -->

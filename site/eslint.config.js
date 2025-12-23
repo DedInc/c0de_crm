@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 
-export default tseslint.config(
+export default tseslint.config([
 	js.configs.recommended,
 	...tseslint.configs.recommended,
 	...svelte.configs['flat/recommended'],
@@ -57,4 +57,4 @@ export default tseslint.config(
 			'no-var': 'error'
 		}
 	}
-);
+]);

@@ -3,106 +3,11 @@ import { Type } from '@sinclair/typebox';
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { db } from '../../db';
 import * as schema from '../../db/schema';
-import { eq, inArray, and } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { protectedProcedure, t } from '../trpc';
 import { hasPermission, isAdmin } from '../../auth';
-
-const BOT_WEBHOOK_URL = process.env.BOT_WEBHOOK_URL || 'http://localhost:8081';
-
-async function sendSingleImageToBot(
-	telegramId: string,
-	message: string,
-	orderTitle?: string,
-	orderId?: string,
-	imageUrl?: string
-): Promise<boolean> {
-	try {
-		const response = await fetch(`${BOT_WEBHOOK_URL}/send-message`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				telegramId,
-				message,
-				orderTitle,
-				orderId,
-				imageUrls: imageUrl ? [imageUrl] : undefined
-			})
-		});
-
-		if (!response.ok) {
-			return false;
-		}
-
-		return true;
-	} catch {
-		return false;
-	}
-}
-
-async function sendMessageToBot(
-	telegramId: string,
-	message: string,
-	orderTitle?: string,
-	orderId?: string,
-	imageUrls?: string[]
-): Promise<boolean> {
-	try {
-		// If no images, send just the message
-		if (!imageUrls || imageUrls.length === 0) {
-			return sendSingleImageToBot(telegramId, message, orderTitle, orderId);
-		}
-
-		// Send images one at a time to avoid payload size limits
-		// First image gets the message caption
-		for (let i = 0; i < imageUrls.length; i++) {
-const caption = i === 0 ? message : '';
-		const success = await sendSingleImageToBot(
-			telegramId,
-			caption,
-			i === 0 ? orderTitle : undefined,
-			i === 0 ? orderId : undefined,
-			imageUrls[i]
-		);
-		if (!success) {
-			// Image failed to send - logged by sendSingleImageToBot
-			}
-		}
-
-		return true;
-	} catch {
-		return false;
-	}
-}
-
-// Check if user has chat permission for a specific order
-async function hasOrderChatPermission(userId: string, orderId: string): Promise<boolean> {
-	const permissionResult = await db
-		.select()
-		.from(schema.orderPermissions)
-		.where(
-			and(
-				eq(schema.orderPermissions.orderId, orderId),
-				eq(schema.orderPermissions.userId, userId),
-				eq(schema.orderPermissions.permission, 'chat_customers')
-			)
-		)
-		.limit(1);
-	const permission = permissionResult[0];
-
-	if (!permission) return false;
-
-	// Check if permission has expired
-	if (permission.expiresAt && permission.expiresAt < new Date()) {
-		// Clean up expired permission
-		await db.delete(schema.orderPermissions)
-			.where(eq(schema.orderPermissions.id, permission.id));
-		return false;
-	}
-
-	return true;
-}
+import { sendMessageToBot } from './bot/webhook-helpers';
+import { hasOrderChatPermission } from './chat/permissions';
 
 export const chatRouter = t.router({
 	getMessages: protectedProcedure

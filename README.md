@@ -1,351 +1,130 @@
-# C0de CRM - Telegram-Powered Freelance Management System
+# C0de CRM
 
-A modern, full-featured CRM system designed specifically for programming studios and freelance development teams. Seamlessly connect with customers through Telegram while managing your entire order workflow in a beautiful web interface.
+A CRM for freelance development teams that bridges a SvelteKit web dashboard with a Telegram bot. Customers manage orders and chat via Telegram; developers and managers handle the workflow, Kanban board, and billing via the web interface.
 
-## 🎨 Need a Custom Version?
+If you need a white-label version of this system, custom payment gateway integration, or specific feature development, contact me here: https://t.me/maehdakvan_1
 
-**I am available for hire!**  
+## Overview
 
-This system is production-ready, but your business might need specific modifications:
-- Custom integrations (payment gateways, external APIs, CRM systems)
-- Additional features (invoicing, time tracking, project management)
-- White-label customization and branding
-- Installation, deployment, and support services
-- Training and documentation for your team
+The system consists of three parts:
+1.  **Web Dashboard (SvelteKit):** For administration, order management, Kanban tracking, and team configuration.
+2.  **Telegram Bot (Python/aiogram):** The customer-facing interface for creating orders, receiving status updates, and chatting with support.
+3.  **Infrastructure:** PostgreSQL for data and Dragonfly (Redis-compatible) for caching and session management.
 
-[Contact me](https://t.me/maehdakvan_1)
+## Tech Stack
 
----
+**Frontend/Web:**
+*   SvelteKit (SSR)
+*   Tailwind CSS 4
+*   shadcn-svelte components
+*   tRPC (Type-safe API)
+*   Drizzle ORM
+*   TypeBox (Validation)
 
-## 🎯 Why C0de CRM?
+**Bot:**
+*   Python 3.11+
+*   aiogram 3.x
+*   aiohttp (Webhook server)
 
-**For Programming Studios & Freelancers:**
-- Accept orders directly through Telegram - meet customers where they are
-- Visual Kanban board for intuitive project tracking
-- Competitive bidding system - programmers can propose prices for orders
-- Automatic notifications keep everyone in sync
-- Role-based access control for teams of any size
+**Backend/Infra:**
+*   PostgreSQL 16
+*   Dragonfly (Redis drop-in replacement)
+*   Docker Compose
 
-**For Customers:**
-- Create orders in seconds via Telegram bot - no registration required
-- Real-time status updates on your projects
-- Direct chat with support team through familiar Telegram interface
-- Track multiple orders with ease
+## Features
 
-## ✨ Key Features
+*   **Telegram Integration:** Customers create orders, receive real-time status updates, and chat with support without leaving Telegram.
+*   **Role-Based Access:** 10 granular permissions (e.g., `moderate_orders`, `assign_orders`, `view_finance`).
+*   **Kanban Workflow:** Drag-and-drop board for order stages (Approved -> In Progress -> Testing -> Completed).
+*   **Bidding System:** Developers can propose prices/estimates for orders; managers approve and assign.
+*   **Real-time Chat:** Bidirectional communication between the web dashboard and Telegram user. detailed context is preserved per order.
+*   **Localization:** Support for English and Russian (stored per user).
 
-### 📱 Telegram Bot Integration
-- **Instant Order Creation** - Customers create detailed orders through a guided conversation flow
-- **Real-time Notifications** - Automatic updates on order approval, assignment, and status changes
-- **In-Bot Chat** - Customers communicate with support without leaving Telegram
-- **Multi-language Support** - English and Russian out of the box (stored per user)
-- **Order Limit Protection** - Customers limited to 2 open orders to prevent spam
-- **Order Deletion** - Customers can delete pending/rejected orders directly from bot
-- **Payment Notifications** - Customers receive payment details with formatted instructions
-
-### 📊 Visual Kanban Board
-- **Drag-and-Drop Interface** - Move orders through stages: Approved → In Progress → Testing → Completed
-- **Permission-Aware** - Programmers can only move their assigned orders; managers have full control
-- **Stack Markers** - Color-coded technology tags for quick visual identification
-- **Real-time Updates** - Changes sync instantly across all users
-
-### 👥 Team Management
-- **Flexible Role System** - Create custom roles with granular permissions (10 available)
-- **Skill Tracking** - Assign technology markers to team members (React, Python, Node.js, etc.)
-- **Telegram Linking** - Staff receive notifications directly in Telegram with verification
-- **Order Assignment** - Assign orders to the right developer based on skills and responses
-- **User Management** - Create users, assign multiple roles, manage credentials
-
-### 💼 Order Lifecycle Management
-- **Moderation Queue** - Review and approve/reject incoming orders (staff with `moderate_orders` permission)
-- **Competitive Responses** - Programmers submit price proposals for approved orders
-- **Budget Validation** - Proposed prices validated against customer budgets (if specified)
-- **Status Workflow** - Full lifecycle from creation to delivery with customer notifications
-- **Order Deletion** - Customers can delete pending or rejected orders via Telegram
-- **Response Management** - Staff review programmer proposals before assignment
-
-### 💬 Real-time Customer Chat
-- **Bidirectional Communication** - Staff messages appear in customer's Telegram
-- **Order Context** - Chat is linked to specific orders for organized communication
-- **Delegated Access** - Grant temporary chat permissions to assigned programmers
-- **Server-Sent Events** - Real-time message updates without page refresh
-- **Image Support** - Send and receive images in chat conversations
-- **Chat State Tracking** - Active chat sessions tracked to prevent message loss
-
-### 💳 Payment & Commission System
-- **Payment Information Management** - Staff can send payment details to customers for active orders
-- **Commission Settings** - Configurable commission rates (percentage + fixed amount) for calculating programmer payments
-- **User Payment Details** - Programmers can save reusable payment details for different payment methods
-- **Payment Tracking** - Full history of payment information sent for each order with timestamps
-- **Secure Payment Flow** - Payment details only sent for orders in progress/testing/completed stages
-
-## 🔐 Security & Permissions
-- **10 Granular Permissions** - Control who can view, moderate, assign, respond, chat, and send payment info
-  - `manage_users` - Create and manage user accounts
-  - `manage_roles` - Create and manage roles
-  - `manage_markers` - Create and manage stack markers
-  - `moderate_orders` - Approve or reject orders
-  - `assign_orders` - Assign orders to programmers
-  - `view_orders` - View approved orders
-  - `respond_orders` - Respond to orders with price proposals
-  - `chat_customers` - Chat with customers
-  - `update_order_status` - Update order status
-  - `send_payment_info` - Send payment details to customers
-- **Order-Level Permissions** - Temporary access grants for specific orders (e.g., chat access for assigned programmer)
-- **Session Management** - Secure authentication with automatic expiration (7-day sessions)
-- **Telegram Verification** - Verify Telegram ID linking with confirmation messages
-
-## 🛠 Tech Stack
-
-### Frontend (SvelteKit)
-| Technology | Purpose |
-|------------|---------|
-| **SvelteKit** | Full-stack framework with SSR |
-| **Tailwind CSS 4** | Utility-first styling |
-| **shadcn-svelte** | Beautiful, accessible UI components |
-| **tRPC** | End-to-end type-safe API |
-| **TypeBox** | Runtime validation |
-| **Drizzle ORM** | Type-safe database queries |
-
-### Backend
-| Technology | Purpose |
-|------------|---------|
-| **PostgreSQL 16** | Primary database |
-| **Dragonfly/Redis** | High-performance caching |
-| **Server-Sent Events** | Real-time chat updates |
-
-### Telegram Bot (Python)
-| Technology | Purpose |
-|------------|---------|
-| **aiogram 3.x** | Modern async Telegram framework |
-| **aiohttp** | Async HTTP client |
-| **Webhook Server** | Receives CRM notifications |
-
-### Infrastructure
-| Technology | Purpose |
-|------------|---------|
-| **Docker Compose** | One-command deployment |
-| **Dragonfly** | 25x faster than Redis, drop-in compatible |
-
-## 🚀 Quick Start
+## Local Development
 
 ### Prerequisites
-- Node.js 18+ and pnpm
-- Python 3.11+
-- Docker & Docker Compose
+*   Node.js 18+ & pnpm
+*   Python 3.11+
+*   Docker & Docker Compose
 
-### 1. Start Infrastructure
+### 1. Infrastructure Setup
+Start the database and cache services.
+
 ```bash
-# Copy environment file and update with your credentials
+# Copy env example
 cp .env.example .env
-# Edit .env and set POSTGRES_PASSWORD to a secure value
+# Set POSTGRES_PASSWORD in .env
 
-# Start PostgreSQL and Dragonfly cache
 docker-compose up -d
 ```
-This starts PostgreSQL (port 5432) and Dragonfly cache (port 6379).
 
-### 2. Setup CRM
+### 2. CRM (Web) Setup
+The web app handles the database migrations.
+
 ```bash
 cd site
 cp .env.example .env
-# Edit site/.env with your database credentials
+# Update .env with your DB credentials (from step 1)
+
 pnpm install
-
-# Run database migrations
 pnpm drizzle-kit push
-
-# Start development server
 pnpm dev
 ```
-Open http://localhost:5173 and login:
-- **Username:** `admin`
-- **Password:** `admin123`
+Access at `http://localhost:5173`.
+**Default Login:** `admin` / `admin123` (Change this immediately).
 
-**⚠️ IMPORTANT:** Change the default admin password immediately after first login!
+*Note: The first run seeds default roles, permissions, and stack markers.*
 
-The first run automatically creates:
-- Administrator, Support, and Programmer roles
-- 10 default stack markers (Python, JavaScript, TypeScript, Java, React, Vue, Svelte, Node.js, PostgreSQL, MongoDB)
-- All system permissions
+### 3. Bot Setup
+The bot requires a token from BotFather.
 
-### 3. Setup Telegram Bot
 ```bash
 cd bot
 cp .env.example .env
-# Edit .env with your BOT_TOKEN from @BotFather and other settings
+# Add your BOT_TOKEN and set CRM_API_URL
 
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Start bot
 python main.py
 ```
 
-### 4. Production Deployment
+## Configuration
 
-For production deployment:
+### Environment Variables
 
-1. **Update all environment variables** with secure values
-2. **Enable caching** in `site/.env`: `CACHE_ENABLED=true`
-3. **Use a reverse proxy** (nginx) with SSL certificates
-4. **Configure proper DATABASE_URL** with production database
-5. **Set CRM_HOST** to your actual domain in `bot/.env`
-6. **Change default passwords** for database and admin account
-
-## 🔄 Order Workflow
-
-```
-Customer creates order (Telegram)
-         ↓
-   Pending Moderation (Staff notified)
-         ↓
-  ┌──────┴──────┐
-  ↓             ↓
-Approved     Rejected (Can be deleted by customer)
-  ↓
-Programmers respond with prices
-  ↓
-Staff assigns order → Programmer notified
-  ↓
-Payment info sent (optional) → Customer receives details
-  ↓
-In Progress ←→ Testing
-         ↓
-     Completed
-         ↓
-     Delivered
-```
-
-Each status change triggers a Telegram notification to the customer. Staff members with appropriate permissions are notified of new orders and responses.
-
-## 🔔 Notification System
-
-| Event | Recipients | Delivery Method |
-|-------|-----------|-----------------|
-| Order Created | Staff with `moderate_orders` permission | Telegram |
-| Order Approved/Rejected | Customer | Telegram |
-| Order Assigned | Customer + Assigned programmer | Telegram |
-| New Response | Staff with `assign_orders` permission | Telegram |
-| Status Change | Customer | Telegram |
-| Chat Message (from CRM) | Customer | Telegram |
-
-
-## 📊 Web Interface Pages
-
-| Page | URL | Description |
-|------|-----|-------------|
-| **Dashboard** | `/dashboard` | Overview and analytics (requires authentication) |
-| **Kanban Board** | `/kanban` | Drag-and-drop order management with status columns |
-| **Orders List** | `/orders` | Tabular view of all orders with filtering |
-| **Order Details** | `/orders/[id]` | Detailed order view with responses, chat, and actions |
-| **Chat** | `/chat` | Real-time customer communication interface |
-| **Users Management** | `/users` | Create/edit users, assign roles and tech markers |
-| **Roles Management** | `/roles` | Configure roles and permissions |
-| **Stack Markers** | `/markers` | Manage technology tags |
-| **Payment Methods** | `/payment-methods` | Configure available payment options |
-| **Profile** | `/profile` | User profile with Telegram linking |
-
-## ⚡ Caching Strategy
-
-| Data | TTL | Invalidation |
-|------|-----|--------------|
-| Users list | 5 min | On user CRUD |
-| Roles list | 15 min | On role CRUD |
-| User permissions | 15 min | On role/permission change |
-| Permissions list | 1 hour | Static |
-| Orders | 1 min | On order update |
-| Markers | 15 min | On marker CRUD |
-
-Configure in `site/.env`:
-```env
-CACHE_ENABLED=true
-REDIS_URL=redis://localhost:6379
-CACHE_TTL=300
-```
-
-Uses Dragonfly (Redis-compatible) for 25x faster performance.figure in `site/.env`:
-```env
-CACHE_ENABLED=true
-REDIS_URL=redis://localhost:6379
-CACHE_TTL=300
-```
-
-## 🌐 Localization
-
-Both CRM and bot support English and Russian. Add new languages:
-
-1. **CRM:** Create `site/src/lib/i18n/locales/{lang}.ts`
-2. **Bot:** Create `bot/locales/{lang}.py`
-3. Update imports in respective index files
-
-
-## 🏗️ Architecture
-
-### Communication Flow
-```
-Customer (Telegram) ←→ Bot (Python/aiogram) ←→ CRM (SvelteKit/tRPC) ←→ Database (PostgreSQL)
-                                    ↑                         ↓
-                              Webhook Server          SSE for real-time chat
-                                    ↓                         ↑
-                             Staff (Web Interface) ←→ Cache (Dragonfly)
-```
-
-### Bot Webhook Server
-The bot includes a built-in webhook server (aiohttp) that receives notifications from the CRM:
-- Order status changes
-- Staff messages to customers
-- Chat access grants
-- Payment information
-
-This allows bidirectional communication between the CRM and Telegram.
-
-## 🔧 Environment Variables
-
-### CRM (`site/.env`)
+**Site (`site/.env`):**
 ```env
 DATABASE_URL=postgresql://user:pass@localhost:5432/crm
+# Caching is optional in dev, recommended for prod
 CACHE_ENABLED=true
 REDIS_URL=redis://localhost:6379
+# URL where the python bot listens for webhooks
 BOT_WEBHOOK_URL=http://localhost:8081
 ```
 
-### Bot (`bot/.env`)
+**Bot (`bot/.env`):**
 ```env
-BOT_TOKEN=your_telegram_bot_token
+BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+# URL of the SvelteKit API
 CRM_API_URL=http://localhost:5173/api/trpc
+# Webhook server settings (internal)
 WEBHOOK_HOST=0.0.0.0
 WEBHOOK_PORT=8081
 ```
 
-## 🤝 Contributing
+### Caching
+The system is configured to use Dragonfly (or Redis). Caching strategies:
+*   **Static Data (Roles, Permissions):** High TTL (15m - 1h)
+*   **Dynamic Data (Orders, Users):** Low TTL (1m - 5m) or invalidated on mutation.
 
-Contributions are welcome! This project is now open-source, and I encourage you to:
+## Deployment Notes
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-Please ensure your code follows the existing style and includes appropriate tests.
-
-## 📄 License
-
-MIT License - feel free to use this for your own programming studio!
-
-See [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with modern tools: SvelteKit, tRPC, Drizzle ORM, aiogram
-- Inspired by the need for better freelance order management
-- Thanks to the open-source community for the amazing tools and libraries
-
----
-
-**Built with ❤️ for programming studios who want to streamline their order management while keeping customers happy through Telegram.**
+1.  **Reverse Proxy:** Use Nginx or Caddy to handle SSL and proxy requests to the SvelteKit app (port 3000/5173) and the Bot webhook (if exposed).
+2.  **Webhook:** The bot runs an aiohttp server to receive updates from the CRM. Ensure the CRM container/process can reach the Bot container/process on `WEBHOOK_PORT`.
+3.  **Production Build:**
+    ```bash
+    cd site
+    pnpm build
+    node build
+    ```

@@ -1,0 +1,22 @@
+export default {
+	'audit.title': 'Журнал действий',
+	'audit.logs': 'Лог активности',
+	'audit.noLogs': 'Записи не найдены',
+	'audit.filterAction': 'Действие',
+	'audit.filterUser': 'Пользователь',
+	'audit.filterDateFrom': 'С',
+	'audit.filterDateTo': 'По',
+	'audit.search': 'Поиск',
+	'audit.searchPlaceholder': 'Поиск по деталям...',
+	'audit.allActions': 'Все действия',
+	'audit.allUsers': 'Все пользователи',
+	'audit.apply': 'Применить',
+	'audit.clearFilters': 'Сбросить',
+	'audit.colTime': 'Время',
+	'audit.colUser': 'Пользователь',
+	'audit.colAction': 'Действие',
+	'audit.colTarget': 'Цель',
+	'audit.colIp': 'IP-адрес',
+	'audit.expand': 'Детали',
+	'audit.collapse': 'Скрыть'
+} as Record<string, string>;

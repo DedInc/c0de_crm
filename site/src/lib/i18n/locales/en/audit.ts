@@ -1,0 +1,22 @@
+export default {
+	'audit.title': 'Audit Log',
+	'audit.logs': 'Activity Log',
+	'audit.noLogs': 'No audit logs found',
+	'audit.filterAction': 'Action',
+	'audit.filterUser': 'User',
+	'audit.filterDateFrom': 'From',
+	'audit.filterDateTo': 'To',
+	'audit.search': 'Search',
+	'audit.searchPlaceholder': 'Search details...',
+	'audit.allActions': 'All actions',
+	'audit.allUsers': 'All users',
+	'audit.apply': 'Apply',
+	'audit.clearFilters': 'Clear',
+	'audit.colTime': 'Time',
+	'audit.colUser': 'User',
+	'audit.colAction': 'Action',
+	'audit.colTarget': 'Target',
+	'audit.colIp': 'IP Address',
+	'audit.expand': 'Details',
+	'audit.collapse': 'Hide'
+} as Record<string, string>;

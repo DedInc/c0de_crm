@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # Dragonfly - Redis-compatible in-memory data store (faster than Redis)
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    container_name: c0de_crm_cache
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    command: >
+      --maxmemory 256mb
+      --proactor_threads 2
+      --cache_mode true
+      --requirepass ${DRAGONFLY_PASSWORD}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${DRAGONFLY_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: c0de_crm_db
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SvelteKit Web Dashboard
+  crm_web:
+    build:
+      context: ./site
+      dockerfile: Dockerfile
+    container_name: c0de_crm_web
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${DRAGONFLY_PASSWORD}@dragonfly:6379
+      CACHE_ENABLED: "true"
+      BOT_WEBHOOK_URL: http://crm_bot:8081
+      BOT_TOKEN: ${BOT_TOKEN}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      CRM_BASE_URL: ${CRM_BASE_URL}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      LOGIN_RATE_LIMIT_FAIL_CLOSED: "true"
+      DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-30000}
+      UPLOAD_RATE_LIMIT_FAIL_CLOSED: "true"
+      UPLOAD_RATE_LIMIT_MAX_PER_USER: ${UPLOAD_RATE_LIMIT_MAX_PER_USER:-60}
+      UPLOAD_RATE_LIMIT_WINDOW_SECONDS: ${UPLOAD_RATE_LIMIT_WINDOW_SECONDS:-3600}
+      UPLOAD_MAX_PER_ORDER_PER_DAY: ${UPLOAD_MAX_PER_ORDER_PER_DAY:-100}
+      MAX_CHAT_SSE_TOTAL_CONNECTIONS: ${MAX_CHAT_SSE_TOTAL_CONNECTIONS:-1000}
+      MAX_CHAT_SSE_CONNECTIONS_PER_ORDER: ${MAX_CHAT_SSE_CONNECTIONS_PER_ORDER:-50}
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: ${XFF_DEPTH:-1}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dragonfly:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # Telegram Bot
+  crm_bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: c0de_crm_bot
+    ports:
+      - "127.0.0.1:8081:8081"
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${DRAGONFLY_PASSWORD}@dragonfly:6379
+      CRM_HOST: crm_web:3000
+      WEBHOOK_HOST: "0.0.0.0"
+      WEBHOOK_PORT: "8081"
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dragonfly:
+        condition: service_healthy
+      crm_web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  dragonfly_data:
+  postgres_data:
